@@ -1,0 +1,307 @@
+** **************************************************************************************
+Standard inställningar
+** **************************************************************************************
+1: Skapa en console app
+2: Lägg till appsettings.json. Uppdatera databas namnet (valfritt). Kom ihåg property "Copy if newer"
+3: Installera alla nuget paket (matchar version)
+	Microsoft.EntityFrameworkCore.SqlServer
+	Microsoft.EntityFrameworkCore.Tools
+	Microsoft.Extensions.Configuration.json
+4: Create json builder (boiler plate code) i Main
+        var builder = new ConfigurationBuilder().AddJsonFile($"appsettings.json", true, true);
+        var config = builder.Build();
+5: Create 'Data' folder. Create classes.
+	1. Person (obs:Exkl. Annotations & 'ShoeSize' & 'County')
+	2. Invoice
+6: Create en ny ApplicationDBContext class (boiler plate code). (exkl. DbSet<County>) 
+   I Main create options & connectionstring variables (boiler plate code).
+	var options = new DbContextOptionsBuilder<ApplicationDbContext>();
+	var connectionString = config.GetConnectionString("DefaultConnection");
+	options.UseSqlServer(connectionString);
+7a: Kör i console 
+	add-migration "Initial migration"
+7b: I Main migrate DbSets to SQL tabeller - F5!
+    Detta kommer att skapa din databas på din lokala DBServer!!! Ta en titt!
+	using (var dbContext = new ApplicationDbContext(options.Options))
+	{
+	    dbContext.Database.Migrate();
+	}
+
+
+** **************************************************************************************
+Best practise
+** **************************************************************************************
+8: Vi vill lämna 'Main' static class och jobbar i vår egen class som heter 'Application'
+	Skapa en ny class i som heter "Application.cs"
+	Lägg till all denna kod
+
+        public void Run()
+        {
+            // 4: Create json builder (boiler plate code)
+            // Makes it possible to connect to appsettings.json
+            var builder = new ConfigurationBuilder()
+                .AddJsonFile($"appsettings.json", true, true);
+            var config = builder.Build();
+
+            // 6: Create DBContext(boiler plate code).
+            // Create options & connectionstring variables(boiler plate code).
+            var options = new DbContextOptionsBuilder<ApplicationDbContext>();
+            var connectionString = config.GetConnectionString("DefaultConnection");
+            options.UseSqlServer(connectionString);
+
+            // 7a: Kör i console add-migration "Initial migration"
+            // 7b: Migrate DbSets to SQL tabeller
+            // Om inte databasen redan finns... så skapas den nu.
+            using (var dbContext = new ApplicationDbContext(options.Options))
+            {
+                dbContext.Database.Migrate();
+            }
+        }
+
+	I Main lägg till denna kod (och raderar all kod som finns där nu!)
+	
+	using DeleteMe;
+
+	// 8: Vill vill lämna 'Main' static class och jobbar i vår egen class som heter 'Application'
+	var app = new Application();
+	app.Run();
+
+8b: Radera din databas på din SQL Server.
+8c: Kör programmet igen för att kontrollerar att allting fungerar 
+    som det ska och att din databas skapas på nytt!
+
+
+** **************************************************************************************
+Template
+** **************************************************************************************
+INFO: Nu är din databas skapad och du har tillgång till datat via din DbContext 
+Här skulle du kunna skapa en kopia av projektet och använder den som en template
+De saker som man behöver ändra på om man ska använda denna template till ett nytt projekt är:
+	a: Ändra namnet på databasen i din appsettings.json
+	b: Ändra namnet på databasen i din dbContext (OnConfiguring metod)
+	c: Ändra klasserna så att de matchar den nya databas du vill skapa
+	d: Radera mappen som heter "Migrations"
+	e: Kör add-migration "Initial migration" igen
+That's it!!!
+
+
+** **************************************************************************************
+add-migration
+** **************************************************************************************
+INFO: Varje gång vi vill ändra i vår databas (add kolumn eller tabell) måste vi köra tex:
+	add-migration "Column added"
+EF Core är så kraftfull att den skapar en ny migration och lägga till det som är tillagd
+i vår databas. Den är så smart att den kör ENDAST de saker som är nya....
+
+
+** **************************************************************************************
+Attributes
+** **************************************************************************************
+https://learn.microsoft.com/en-us/ef/core/modeling/entity-properties?tabs=data-annotations%2Cwithout-nrt
+INFO: Attributes hjälper oss att bestämma hur våra kolumner ska se ut (vilka properties de har)
+
+9: Create some attributes for our Person table columns tex.
+Name	[Required] [MaxLength(100)]
+Age	[Range(15,100)]
+Id	[Key]
+
+Kom ihåg! Nu har vi ändrat på vår databas!
+Då måste vi köra en ny add-migration.. .tex:
+add-migration "Added attributes to Name & Age"
+
+När vi kör vår app med F5 så kommer databasen att uppdateras. Tack vare 
+	dbContext.Database.Migrate();
+Titta på Person tabellen i SQL Server - Gå till Design läge
+
+
+** **************************************************************************************
+Lägg till en kolumn i en befintlig tabell
+** **************************************************************************************
+10: Vi lägger till en kolumn i 'Person' classen. tex:
+ShoeSize	[Range(1,60)]
+
+Kom ihåg! Nu har vi ändrat på vår databas!
+Då måste vi köra en ny add-migration.. .tex:
+add-migration "Added ShoeSize to person"
+
+När vi kör vår app med F5 så kommer databasen att uppdateras. Tack vare 
+	dbContext.Database.Migrate();
+Titta på Person tabellen i SQL Server - Nu finns ShoeSize!
+
+
+** **************************************************************************************
+Lägg till en ny tabell
+** **************************************************************************************
+11: Vi lägger till en helt ny tabell (C# class) som heter 'County'
+
+Lägg till 'County' som en DbSet<> i din dbcontext
+	public DbSet<County> County { get; set; }
+
+Kom ihåg! Nu har vi ändrat på vår databas!
+Då måste vi köra en ny add-migration.. .tex:
+add-migration "Added County table"
+
+När vi kör vår app med F5 så kommer databasen att uppdateras. Tack vare 
+	dbContext.Database.Migrate();
+
+INFO: Vi skulle kunna tom. ändra namnet på databasen (tex. 'InvoiceVersion2') i appsettings.json och spara 
+allt till en ny databas. Inclusive alla vår migrations!
+
+Titta på County tabellen i SQL Server - Woohoo!!
+
+
+** **************************************************************************************
+OH NO!!! Vi glömde koppla 'County' till vår 'Person'
+** **************************************************************************************
+12: Vi vill koppla varje 'Person' till en 'County'. tex:
+
+INFO: Rita ut en databas diagram från SMMS
+      Vi ser att Person har ingen relation med County!
+
+Lägg till denna kod i Person
+	public County County { get; set; }
+
+Kom ihåg! Nu har vi ändrat på vår databas!
+Då måste vi köra en ny add-migration.. .tex:
+add-migration "Connected Person to County"
+
+När vi kör vår app med F5 så kommer databasen att uppdateras. Tack vare 
+	dbContext.Database.Migrate();
+
+INFO: Rita ut en databas diagram från SMMS
+
+
+** **************************************************************************************
+Best practise
+** **************************************************************************************
+13: Create a new class 'DataInitializer' med en Metod som heter 'MigrateAnDSeed(dbContext)'
+
+(BEST PRACTISE)
+Nu kan vi flytta raden i vår Application class 
+	dbContext.Database.Migrate();
+Till vår nya metod I DataInitializer klassen
+OBS: Detta skapar jordgubbsland eftersom vi har inte skapat metoden SeedCountys än... det kommer :)
+	public void MigrateAndSeed(ApplicationDbContext dbContext)
+        {
+            dbContext.Database.Migrate();
+            SeedCountys(dbContext);
+            dbContext.SaveChanges();
+        }
+
+Ändra using till denna kod i Application.cs metod Run()
+	using (var dbContext = new ApplicationDbContext(options.Options))
+	{
+		var dataInitiaizer = new DataInitializer();
+		dataInitiaizer.MigrateAndSeed(dbContext);
+
+		// Migrate har flyttats till dataInitializer class (BEST PRACTISE)
+		// dbContext.Database.Migrate();
+	}
+
+
+** **************************************************************************************
+SEED Data (Stödtabell - County)
+** **************************************************************************************
+14: Fyll på stödtabellen 'County'.
+Skapa en metod i DataInitializer klassen som heter 
+	SeedCountys(ApplicationsDbContext dbContext)
+
+INFO: Kör din app med F5. Kolla nu på din databas... 
+Ser du att det finns data i County tabellen numera? Coooolt!
+
+Varje gång din app körs så kommer detta data att skapas (om det inte finns redan!)
+OBS: Även om du skulle av misstag ta bort data i County
+
+
+** **************************************************************************************
+(C)REATE
+** **************************************************************************************
+15: I Application.cs 
+Vi ger användaren möjlighet att skapa nya personer och lägger till de i databasen
+
+
+** **************************************************************************************
+(R)EAD
+** **************************************************************************************
+16:  I Application.cs 
+Vi ger användaren möjlighet att se alla personer som finns i vår databas
+
+17a: Sätt en breakpoint på Read koden... varför är County null i min person (i foreach loopen)
+
+Hmmm varför ser inte jag någon information i 'County'?
+17b: Jag måste nog köra INCLUDE för att få se datat....
+
+
+** **************************************************************************************
+(U)PDATE
+** **************************************************************************************
+18:  I Application.cs 
+Vi ger användaren möjlighet att uppdatera befintliga personer som finns i vår databas
+
+
+** **************************************************************************************
+(D)ELETE
+** **************************************************************************************
+19:  I Application.cs 
+Vi ger användaren möjlighet att radera befintliga personer som finns i vår databas
+
+
+** **************************************************************************************
+Refactoring
+** **************************************************************************************
+20: Hmmm det är något konstigt i min kod.
+
+
+ÖVNING!!!
+=========
+
+Nu är det er tur!
+
+Refactoring01 - : SRP!!! 
+Vår Application class gör väldigt mycket just nu.
+Vi kanske ska splittra på det lite och lägger det i flera klasser.
+Det vore smart om de fanns i en ny mapp också...
+Undrar om vi kan kalla mappen för Controllers. tex.
+
+Controllers =>
+		Build
+
+Vi skapar en ny klass som heter Build och flyttar all kod som bygger databasen dit.
+
+
+Refactoring02 - Användaren har inte möjlighet att välja vad de vill göra!
+Vi behöver någon form av meny som anropar varje del (C R U D) beroende på vad användaren väljer.
+
+Controllers =>
+		Build
+		Main Menu
+
+
+Refactoring 03,04,05 - Till slut kan vi skapa klasser för alla CRUD operationer
+Controllers =>
+		Build
+		Main Menu
+		Create
+		Read
+		Update
+		Delete
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+github länk: https://github.com/RichardChalk/EFCoreCodeFirstTogether
