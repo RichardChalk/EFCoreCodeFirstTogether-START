@@ -20,19 +20,21 @@ Standard inställningar
 	options.UseSqlServer(connectionString);
 7a: Kör i console 
 	add-migration "Initial migration"
-7b: I Main migrate DbSets to SQL tabeller - F5!
+7b: I Main migrate DbSets to SQL tabeller!
     Detta kommer att skapa din databas på din lokala DBServer!!! Ta en titt!
 	using (var dbContext = new ApplicationDbContext(options.Options))
 	{
 	    dbContext.Database.Migrate();
 	}
+   
+    F5!  
 
 
 ** **************************************************************************************
 Best practise
 ** **************************************************************************************
 8: Vi vill lämna 'Main' static class och jobbar i vår egen class som heter 'Application'
-	Skapa en ny class i som heter "Application.cs"
+	Skapa en ny class i som heter "Application.cs" (på root nivå - samma som Program.cs)
 	Lägg till all denna kod
 
         public void Run()
@@ -105,13 +107,19 @@ Name	[Required] [MaxLength(100)]
 Age	[Range(15,100)]
 Id	[Key]
 
+OBS: [Key]
+Denna annotation behövs om min Primary Key döps till något annat än just "Id"
+
+BEFORE - Titta på Person tabellen i SQL Server - Gå till Design läge
+
 Kom ihåg! Nu har vi ändrat på vår databas!
 Då måste vi köra en ny add-migration.. .tex:
 add-migration "Added attributes to Name & Age"
 
 När vi kör vår app med F5 så kommer databasen att uppdateras. Tack vare 
 	dbContext.Database.Migrate();
-Titta på Person tabellen i SQL Server - Gå till Design läge
+
+AFTER - Titta på Person tabellen i SQL Server - Gå till Design läge
 
 
 ** **************************************************************************************
@@ -132,7 +140,7 @@ Titta på Person tabellen i SQL Server - Nu finns ShoeSize!
 ** **************************************************************************************
 Lägg till en ny tabell
 ** **************************************************************************************
-11: Vi lägger till en helt ny tabell (C# class) som heter 'County'
+11: Vi lägger till en helt ny tabell (C# class) som heter 'County' (i 'Data' mappen).
 
 Lägg till 'County' som en DbSet<> i din dbcontext
 	public DbSet<County> County { get; set; }
@@ -174,7 +182,7 @@ INFO: Rita ut en databas diagram från SMMS
 ** **************************************************************************************
 Best practise
 ** **************************************************************************************
-13: Create a new class 'DataInitializer' med en Metod som heter 'MigrateAnDSeed(dbContext)'
+13: Create a new class 'DataInitializer' (i 'Data' mappen) med en Metod som heter 'MigrateAnDSeed(dbContext)'
 
 (BEST PRACTISE)
 Nu kan vi flytta raden i vår Application class 
@@ -212,21 +220,28 @@ Ser du att det finns data i County tabellen numera? Coooolt!
 Varje gång din app körs så kommer detta data att skapas (om det inte finns redan!)
 OBS: Även om du skulle av misstag ta bort data i County
 
+OBS2: Jag behöver inte köra 'add-migration' eftersom jag ändrar INTE på database schemat!
+      Det enda jag gör är lägga till data... :)
+
 
 ** **************************************************************************************
 (C)REATE
 ** **************************************************************************************
 15: I Application.cs 
 Vi ger användaren möjlighet att skapa nya personer och lägger till de i databasen
+(kopiera koden från START appen)
 
+F5 - Testa att lägga in en person
+     Titta i SSMS på den nya personen! Woohoo!
 
 ** **************************************************************************************
 (R)EAD
 ** **************************************************************************************
 16:  I Application.cs 
 Vi ger användaren möjlighet att se alla personer som finns i vår databas
+(kopiera koden från START appen)
 
-17a: Sätt en breakpoint på Read koden... varför är County null i min person (i foreach loopen)
+17a: Sätt en breakpoint på Read koden... varför är 'County' null i min 'person' (i foreach loopen)
 
 Hmmm varför ser inte jag någon information i 'County'?
 17b: Jag måste nog köra INCLUDE för att få se datat....
@@ -237,6 +252,7 @@ Hmmm varför ser inte jag någon information i 'County'?
 ** **************************************************************************************
 18:  I Application.cs 
 Vi ger användaren möjlighet att uppdatera befintliga personer som finns i vår databas
+(kopiera koden från START appen)
 
 
 ** **************************************************************************************
@@ -244,7 +260,7 @@ Vi ger användaren möjlighet att uppdatera befintliga personer som finns i vår
 ** **************************************************************************************
 19:  I Application.cs 
 Vi ger användaren möjlighet att radera befintliga personer som finns i vår databas
-
+(kopiera koden från START appen)
 
 ** **************************************************************************************
 Refactoring
