@@ -271,6 +271,10 @@ Refactoring
 ÖVNING!!!
 =========
 
+OBS:
+Vi kommer att titta på en möjlig lösning till denna övning tillsammans i nästa lektion!
+Men testa gärna själva först!
+
 Nu är det er tur!
 
 Refactoring01 - : SRP!!! 
