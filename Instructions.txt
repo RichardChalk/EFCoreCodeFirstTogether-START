@@ -163,7 +163,7 @@ OH NO!!! Vi glömde koppla 'County' till vår 'Person'
 ** **************************************************************************************
 12: Vi vill koppla varje 'Person' till en 'County'. tex:
 
-INFO: Rita ut en databas diagram från SMMS
+INFO: Rita ut en databas diagram från SSMS
       Vi ser att Person har ingen relation med County!
 
 Lägg till denna kod i Person
