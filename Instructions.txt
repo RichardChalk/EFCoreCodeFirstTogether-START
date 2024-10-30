@@ -3,6 +3,20 @@ Standard inställningar
 ** **************************************************************************************
 1: Skapa en console app
 2: Lägg till appsettings.json. Uppdatera databas namnet (valfritt). Kom ihåg property "Copy if newer"
+
+I en konsolapp måste du ofta ändra egenskapen till "Copy if newer" för filer som 
+.json-konfigurationsfiler för att säkerställa att de kopieras till bin-mappen när du bygger 
+eller kör applikationen. 
+Detta är viktigt för att applikationen ska hitta rätt version av filen vid körning.
+
+Här är varför "Copy if newer" är användbart:
+Undviker onödiga kopieringar: 
+	Filen kopieras endast om den har ändrats, vilket kan minska byggtiden.
+Garanterar att senaste versionen används: 
+	Om du ändrar konfigurationsfilen eller någon annan resurs kopieras den automatiskt 
+	till output-mappen, så du alltid får uppdaterade inställningar.
+
+
 3: Installera alla nuget paket (matchar version)
 	Microsoft.EntityFrameworkCore.SqlServer
 	Microsoft.EntityFrameworkCore.Tools
