@@ -27,7 +27,7 @@ Garanterar att senaste versionen används:
 5: Create 'Data' folder. Create classes.
 	1. Person (obs:Exkl. Annotations & 'ShoeSize' & 'County')
 	2. Invoice
-6: Create en ny ApplicationDBContext class (boiler plate code). (exkl. DbSet<County>) 
+6: Create en ny ApplicationDbContext class (boiler plate code). (exkl. DbSet<County>) 
    I Main create options & connectionstring variables (boiler plate code).
 	var options = new DbContextOptionsBuilder<ApplicationDbContext>();
 	var connectionString = config.GetConnectionString("DefaultConnection");
