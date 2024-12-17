@@ -157,13 +157,13 @@ BEFORE - Titta på Person tabellen i SQL Server - Gå till Design läge
 
 Kom ihåg! Nu har vi ändrat på vår databas!
 Då måste vi köra en ny add-migration.. .tex:
-add-migration "Added attributes to Name & Age"
+	add-migration "Added attributes to Name & Age"
 
 När vi kör vår app med F5 så kommer databasen att uppdateras. Tack vare 
 	dbContext.Database.Migrate();
 
 AFTER - Titta på Person tabellen i SQL Server - Gå till Design läge
-        Vi ser att NAme length är numera nmax 100!
+        Vi ser att Name length är numera max 100!
 	Age ser likadant ut... Range gäller endast validering och ändra inte schemat!
 
 ** **************************************************************************************
@@ -174,7 +174,7 @@ ShoeSize	[Range(1,60)]
 
 Kom ihåg! Nu har vi ändrat på vår databas!
 Då måste vi köra en ny add-migration.. .tex:
-add-migration "Added ShoeSize to person"
+	add-migration "Added ShoeSize to person"
 
 När vi kör vår app med F5 så kommer databasen att uppdateras. Tack vare 
 	dbContext.Database.Migrate();
@@ -191,7 +191,7 @@ Lägg till 'County' som en DbSet<> i din dbcontext
 
 Kom ihåg! Nu har vi ändrat på vår databas!
 Då måste vi köra en ny add-migration.. .tex:
-add-migration "Added County table"
+	add-migration "Added County table"
 
 När vi kör vår app med F5 så kommer databasen att uppdateras. Tack vare 
 	dbContext.Database.Migrate();
@@ -215,7 +215,7 @@ Lägg till denna kod i Person (Cardinality - One to One)
 
 Kom ihåg! Nu har vi ändrat på vår databas!
 Då måste vi köra en ny add-migration.. .tex:
-add-migration "Connected Person to County"
+	add-migration "Connected Person to County"
 
 När vi kör vår app med F5 så kommer databasen att uppdateras. Tack vare 
 	dbContext.Database.Migrate();
