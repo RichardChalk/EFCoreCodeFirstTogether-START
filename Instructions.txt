@@ -1,8 +1,29 @@
+A. Öppna START koden 
+https://github.com/RichardChalk/EFCoreCodeFirstTogether-START
+
+B. …Skapa en ny Console app och kopiera koden från START projektet ovan ett steg i taget 
+enligt instruktions i denna fil…
+
+
 ** **************************************************************************************
 Standard inställningar
 ** **************************************************************************************
 1: Skapa en console app
 2: Lägg till appsettings.json. Uppdatera databas namnet (valfritt). Kom ihåg property "Copy if newer"
+
+	{
+	  "ConnectionStrings": {
+	    "DefaultConnection": "Server=localhost;Database=Invoice12345;Trusted_Connection=True;TrustServerCertificate=true;MultipleActiveResultSets=true"
+	  },
+	  "Logging": {
+	    "LogLevel": {
+	      "Default": "Information",
+	      "Microsoft": "Warning",
+	      "Microsoft.Hosting.Lifetime": "Information"
+	    }
+	  },
+	  "AllowedHosts": "*"
+	}
 
 I en konsolapp måste du ofta ändra egenskapen till "Copy if newer" för filer som 
 .json-konfigurationsfiler för att säkerställa att de kopieras till bin-mappen när du bygger 
@@ -16,19 +37,18 @@ Garanterar att senaste versionen används:
 	Om du ändrar konfigurationsfilen eller någon annan resurs kopieras den automatiskt 
 	till output-mappen, så du alltid får uppdaterade inställningar.
 
-
 3: Installera alla nuget paket (matchar version)
 	Microsoft.EntityFrameworkCore.SqlServer
 	Microsoft.EntityFrameworkCore.Tools
 	Microsoft.Extensions.Configuration.json
-4: Create json builder (boiler plate code) i Main
+4: Create json builder (boiler plate code) i Main()
         var builder = new ConfigurationBuilder().AddJsonFile($"appsettings.json", true, true);
         var config = builder.Build();
 5: Create 'Data' folder. Create classes.
 	1. Person (obs:Exkl. Annotations & 'ShoeSize' & 'County')
 	2. Invoice
-6: Create en ny ApplicationDbContext class (boiler plate code). (exkl. DbSet<County>) 
-   I Main create options & connectionstring variables (boiler plate code).
+6: i 'Data' folder create en ny ApplicationDbContext class (boiler plate code). (exkl. DbSet<County>) 
+   I Main() create options & connectionstring variables (boiler plate code).
 	var options = new DbContextOptionsBuilder<ApplicationDbContext>();
 	var connectionString = config.GetConnectionString("DefaultConnection");
 	options.UseSqlServer(connectionString);
@@ -36,13 +56,15 @@ Garanterar att senaste versionen används:
 	add-migration "Initial migration"
 7b: I Main migrate DbSets to SQL tabeller!
     Detta kommer att skapa din databas på din lokala DBServer!!! Ta en titt!
+    OBS: .Migrate() motsvarar update-database i konsolen!
 	using (var dbContext = new ApplicationDbContext(options.Options))
 	{
 	    dbContext.Database.Migrate();
 	}
    
-    F5!  
-
+7c: F5! 
+    OBS: Ingenting händer i konsolen!!! Men kika på din SQL Server!
+         Nu finns det en ny databas där! Coooolt!
 
 ** **************************************************************************************
 Best practise
@@ -100,11 +122,10 @@ De saker som man behöver ändra på om man ska använda denna template till ett
 	e: Kör add-migration "Initial migration" igen
 That's it!!!
 
-
 ** **************************************************************************************
 add-migration
 ** **************************************************************************************
-INFO: Varje gång vi vill ändra i vår databas (add kolumn eller tabell) måste vi köra tex:
+INFO: Varje gång vi vill ändra i vår databas schema (add kolumn eller tabell) måste vi köra tex:
 	add-migration "Column added"
 EF Core är så kraftfull att den skapar en ny migration och lägga till det som är tillagd
 i vår databas. Den är så smart att den kör ENDAST de saker som är nya....
@@ -117,12 +138,20 @@ https://learn.microsoft.com/en-us/ef/core/modeling/entity-properties?tabs=data-a
 INFO: Attributes hjälper oss att bestämma hur våra kolumner ska se ut (vilka properties de har)
 
 9: Create some attributes for our Person table columns tex.
+
+OBS: Använd [Required] om du vill garantera att databaskolumnen blir NOT NULL och samtidigt 
+     möjliggöra validering i kod.
 Name	[Required] [MaxLength(100)]
 Age	[Range(15,100)]
 Id	[Key]
 
 OBS: [Key]
 Denna annotation behövs om min Primary Key döps till något annat än just "Id"
+
+OBS: Om man kör F5 nu blir det ERROR! Eftersom vi har ändringar i vår C# App 
+     som INTE matchar SQL databasen! Se error nedan...
+     "The model for context 'ApplicationDbContext' has pending changes. 
+      Add a new migration before updating the database." 
 
 BEFORE - Titta på Person tabellen i SQL Server - Gå till Design läge
 
@@ -134,7 +163,8 @@ När vi kör vår app med F5 så kommer databasen att uppdateras. Tack vare
 	dbContext.Database.Migrate();
 
 AFTER - Titta på Person tabellen i SQL Server - Gå till Design läge
-
+        Vi ser att NAme length är numera nmax 100!
+	Age ser likadant ut... Range gäller endast validering och ändra inte schemat!
 
 ** **************************************************************************************
 Lägg till en kolumn i en befintlig tabell
@@ -180,7 +210,7 @@ OH NO!!! Vi glömde koppla 'County' till vår 'Person'
 INFO: Rita ut en databas diagram från SSMS
       Vi ser att Person har ingen relation med County!
 
-Lägg till denna kod i Person
+Lägg till denna kod i Person (Cardinality - One to One)
 	public County County { get; set; }
 
 Kom ihåg! Nu har vi ändrat på vår databas!
@@ -190,8 +220,8 @@ add-migration "Connected Person to County"
 När vi kör vår app med F5 så kommer databasen att uppdateras. Tack vare 
 	dbContext.Database.Migrate();
 
-INFO: Rita ut en databas diagram från SMMS
-
+INFO: Rita ut en ny databas diagram från SMMS
+      Nu är Person kopplad till County!
 
 ** **************************************************************************************
 Best practise
@@ -229,14 +259,13 @@ Skapa en metod i DataInitializer klassen som heter
 	SeedCountys(ApplicationsDbContext dbContext)
 
 INFO: Kör din app med F5. Kolla nu på din databas... 
-Ser du att det finns data i County tabellen numera? Coooolt!
+Ser du att det finns data i County tabellen numera? Seeding baby! Coooolt!
 
 Varje gång din app körs så kommer detta data att skapas (om det inte finns redan!)
 OBS: Även om du skulle av misstag ta bort data i County
 
 OBS2: Jag behöver inte köra 'add-migration' eftersom jag ändrar INTE på database schemat!
       Det enda jag gör är lägga till data... :)
-
 
 ** **************************************************************************************
 (C)REATE
@@ -275,3 +304,5 @@ Vi ger användaren möjlighet att uppdatera befintliga personer som finns i vår
 19:  I Application.cs 
 Vi ger användaren möjlighet att radera befintliga personer som finns i vår databas
 (kopiera koden från START appen)
+
+En fråga... Är det bra att vi använder .Remove() metoden?
