@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace EFCoreCodeFirstTogether_START
 {
+    // Updated to .net8.0
     internal class Program
     {
         static void Main(string[] args)
